@@ -307,6 +307,33 @@ void I2C_EV_HANDLE(I2C_Handle_t *pI2CHandle){
 }
 }
 
+void I2C_ER_Handler(I2C_Handle_t *pI2CHandle)
+{
+    if(I2C1->SR1 & (1U << 8))
+    {
+        I2C1->SR1 &= ~(1U << 8);
+        I2C_ApplicationEventCallback(pI2CHandle,I2C_ERROR_BERR);
+    }
+
+    if(I2C1->SR1 & (1U << 9))
+    {
+        I2C1->SR1 &= ~(1U << 9);
+        I2C_ApplicationEventCallback(pI2CHandle,I2C_ERROR_ARLO);
+    }
+
+    if(I2C1->SR1 & (1U << 10))
+    {
+        I2C1->SR1 &= ~(1U << 10);
+        I2C_ApplicationEventCallback(pI2CHandle,I2C_ERROR_AF);
+    }
+
+    if(I2C1->SR1 & (1U << 11))
+    {
+        I2C1->SR1 &= ~(1U << 11);
+        I2C_ApplicationEventCallback(pI2CHandle,I2C_ERROR_OVR);
+    }
+}
+
 void __attribute__((weak)) I2C_ApplicationEventCallback(I2C_Handle_t *pI2CHandle,uint8_t AppEv){
 
 }

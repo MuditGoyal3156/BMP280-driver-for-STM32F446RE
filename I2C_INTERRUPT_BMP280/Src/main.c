@@ -53,25 +53,36 @@ void I2C1_EV_IRQHandler(void)
 
 void I2C1_ER_IRQHandler(void)
 {
-
+	I2C_ER_Handler(&I2C_Handle);
 }
 
 void I2C_ApplicationEventCallback(I2C_Handle_t *pI2CHandle,uint8_t AppEv)
 {
-	if(AppEv == I2C_EV_TX_CMPLT){
-	}else if(AppEv == I2C_EV_RX_CMPLT){
+	if(AppEv == I2C_ERROR_BERR){
+        printf("I2C Bus Error\r\n");
 
+	}else if(AppEv == I2C_ERROR_ARLO){
+
+        printf("I2C Arbitration Lost\r\n");
 
 	}else if(AppEv == I2C_ERROR_AF)
 	{
-		printf("Error : Ack failure\n");
-		//in master ACK failure happens when slave fails to send ack for the byte from the master
+		printf("Ack failure\n");
+
 		I2C_CloseSendData(&I2C_Handle);
 
-		//Generate the stop condition
 		Generate_Stop();
 
-		//hang in infinite loop
 		while(1);
+	}
+	else if(AppEv == I2C_ERROR_OVR){
+
+        printf("I2C Overrun Error\r\n");
+
+        I2C_CloseReceiveData(pI2CHandle);
+
+        Generate_Stop();
+
+        while(1);
 	}
 }

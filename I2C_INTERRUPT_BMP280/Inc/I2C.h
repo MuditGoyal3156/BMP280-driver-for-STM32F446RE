@@ -49,5 +49,6 @@ uint8_t I2C_RX_DATA(I2C_Handle_t *pI2CHandle,uint8_t *Data,uint8_t len,uint8_t S
 void I2C_CloseSendData(I2C_Handle_t *pI2CHandle);
 void I2C_CloseReceiveData(I2C_Handle_t *pI2CHandle);
 void I2C_EV_HANDLE(I2C_Handle_t *pI2CHandle);
+void I2C_ER_Handler(I2C_Handle_t *pI2CHandle);
 void I2C_ApplicationEventCallback(I2C_Handle_t *pI2CHandle,uint8_t AppEv);
 #endif /* I2C_H_ */
