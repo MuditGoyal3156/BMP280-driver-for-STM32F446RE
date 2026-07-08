@@ -1,12 +1,12 @@
 /*
- * temp.h
+ * BMP280.h
  *
- *  Created on: Dec 24, 2025
+ *  Created on: 25-Jun-2026
  *      Author: mudit
  */
 
-#ifndef TEMP_H_
-#define TEMP_H_
+#ifndef BMP280_H_
+#define BMP280_H_
 
 #include <stdint.h>
 
@@ -25,5 +25,4 @@ uint8_t BMP280_Init(void);
 int32_t BMP280_ReadTemperature(void);
 uint32_t BMP280_ReadPressure(void);
 
-
-#endif /* TEMP_H_ */
+#endif /* BMP280_H_ */

@@ -1,14 +1,7 @@
-/*
- * temp.c
- *
- *  Created on: Dec 24, 2025
- *      Author: mudit
- */
-
+#include "BMP280.h"
 #include "I2C.h"
-#include "temp.h"
 
-static int32_t t_fine;
+int32_t t_fine;
 
 typedef struct
 {
@@ -26,37 +19,30 @@ typedef struct
     int16_t  dig_P9;
 } BMP280_Calib_t;
 
-static BMP280_Calib_t calib;
-
-static void bmp280_write(uint8_t reg, uint8_t data)
+BMP280_Calib_t calib;
+void bmp280_write(uint8_t reg, uint8_t data)
 {
     uint8_t buf[2] = {reg, data};
-    I2C1_SendData(buf, 2, BMP280_ADDR);
+    I2C_SEND_DATA(&I2C_Handle, buf, 2, BMP280_ADDR, 0);
+    while(I2C_Handle.TxRxState != I2C_READY);
 }
 
-static void bmp280_read(uint8_t reg, uint8_t *buf, uint8_t len)
+void bmp280_read(uint8_t reg, uint8_t *buf, uint8_t len)
 {
-    //Generate Start
-    I2C_GenerateStart();
-    while(!(I2C1_SR1 & (1 << 0))); // Wait for SB
 
-    Execute_Send_Addr(BMP280_ADDR); // Send Slave Address
-    while(!(I2C1_SR1 & (1 << 1))); // Wait for ADDR flag
+    uint8_t regstr = reg;
+    I2C_SEND_DATA(&I2C_Handle, &regstr, 1, BMP280_ADDR,1);
 
-    // Clear ADDR flag
-    uint32_t dummy = I2C1_SR1;
-    dummy = I2C1_SR2;
-    (void)dummy;
+    // Wait for TX to finish (I2C_CloseSendData sets state back to READY)
+    while(I2C_Handle.TxRxState != I2C_READY);
 
-    while(!(I2C1_SR1 & (1 << 7))); // Wait for TXE
-    I2C1_DR = reg;                 // Send the Register Address we want to read
-    while(!(I2C1_SR1 & (1 << 7))); // Wait for TXE
+    I2C_RX_DATA(&I2C_Handle, buf, len, BMP280_ADDR);
 
-    //Repeated Start
-
-    I2C1_ReadData(buf, len, BMP280_ADDR);
+    // Wait for RX to finish
+    while(I2C_Handle.TxRxState != I2C_READY);
 }
-static void bmp280_read_calibration(void)
+
+void bmp280_read_calibration(void)
 {
     uint8_t buf[24];
     bmp280_read(BMP280_CALIB_REG, buf, 24);
@@ -75,7 +61,6 @@ static void bmp280_read_calibration(void)
     calib.dig_P8 = (buf[21] << 8) | buf[20];
     calib.dig_P9 = (buf[23] << 8) | buf[22];
 }
-
 uint8_t BMP280_Init(void)
 {
     uint8_t id;
